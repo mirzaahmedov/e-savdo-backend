@@ -13,16 +13,117 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  USER
+}
+
 model User {
-  id Int @default(autoincrement()) @id
-  name String
-  phone String @unique
+  id Int @id @default(autoincrement())
+  firstName String
+  lastName String?
+  phone Int @unique
+  password String
+  role UserRole @default(USER)
+  shoppingCartItems ShoppingCartItem[]
+  updatedDate DateTime? @updatedAt
+  createdDate DateTime @default(now())
+  
+  @@map("users")
+}
+
+model ShoppingCartItem {
+  id Int @id @default(autoincrement())
+  quantity Int
+  productVariation ProductVariation @relation(fields: [productVariationID], references: [id])
+  productVariationID Int
+  user User @relation(fields: [userID], references: [id])
+  userID Int
+  updatedDate DateTime? @updatedAt
+  createdDate DateTime @default(now())
+
+  @@map("shopping_cart_items")
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  nameUZ String
+  nameOZ String
+  nameRU String
+  icon String?
+  parent Category? @relation("parent-category", fields: [parentID], references: [id])
+  parentID Int? 
+  children Category[] @relation("parent-category")
+  products Product[]
+  updatedDate DateTime @updatedAt
+  createdDate DateTime @default(now())
+
+  @@map("categories")
 }
 
 model Product {
-  id Int @default(autoincrement()) @id
+  id Int @id @default(autoincrement())
   nameUZ String
-  nameRU String
   nameOZ String
-  price Float
+  nameRU String
+  descriptionUZ String
+  descriptionOZ String
+  descriptionRU String
+  rating Int
+  category Category @relation(fields: [categoryID], references: [id])
+  categoryID Int
+  variations ProductVariation[]
+  updatedDate DateTime? @updatedAt
+  createdDate DateTime @default(now())
+
+  @@map("products")
 }
+
+model ProductVariation {
+  id Int @id @default(autoincrement())
+  product Product @relation(fields: [productID], references: [id])
+  productID Int
+  price Int
+  discount Int?
+  stock Int
+  images ProductImage[]
+  attributes ProductAttribute[]
+  shoppingCartItems ShoppingCartItem[]
+  updatedDate DateTime? @updatedAt
+  createdDate DateTime @default(now())
+
+  @@map("product_variations")
+}
+
+model ProductImage {
+  id Int @id @default(autoincrement())
+  url String
+  variation ProductVariation @relation(fields: [variationID], references: [id])
+  variationID Int
+  updatedDate DateTime? @updatedAt
+  createdDate DateTime @default(now())
+
+  @@map("product_images")
+}
+
+enum ProductAttributeType {
+  COLOR
+  NUMERIC
+  TEXT
+  BOOLEAN
+}
+model ProductAttribute {
+  id Int @id @default(autoincrement())
+  variation ProductVariation @relation(fields: [variationID], references: [id])
+  variationID Int
+  type ProductAttributeType
+  nameUZ String
+  nameOZ String
+  nameRU String
+  value String
+  updatedDate DateTime? @updatedAt
+  createdDate DateTime @default(now())
+
+  @@map("product_attributes")
+}
+
