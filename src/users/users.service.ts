@@ -1,12 +1,17 @@
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { compare, hash } from 'bcrypt';
+
 import { CreateUserDto } from './dto/create-user.dto';
-import { Injectable } from '@nestjs/common';
 import { LoginUserDto } from './dto/login-user-dto';
 import { PrismaService } from '@app/prisma/prisma.service';
 import { RegisterUserDto } from './dto/register-user-dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { UserPayload } from './interfaces/user-payload.interface';
-import { hash } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 
 @Injectable()
@@ -39,6 +44,12 @@ export class UsersService {
         phone: loginUserDto.phone,
       },
     });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (!(await compare(loginUserDto.password, user.password))) {
+      throw new UnauthorizedException('Invalid password');
+    }
 
     const payload: UserPayload = {
       userID: user.id,

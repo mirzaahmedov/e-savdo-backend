@@ -7,8 +7,10 @@ import { ProductAttributesModule } from './product-attributes/product-attributes
 import { ProductImagesModule } from './product-images/product-images.module';
 import { ProductVariationsModule } from './product-variations/product-variations.module';
 import { ProductsModule } from './products/products.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { ShoppingCartItemsModule } from './shopping-cart-items/shopping-cart-items.module';
 import { UsersModule } from './users/users.module';
+import { join } from 'path';
 
 MulterModule.register({
   dest: './uploads',
@@ -25,6 +27,10 @@ MulterModule.register({
     ProductAttributesModule,
     ProductImagesModule,
     ShoppingCartItemsModule,
+    ServeStaticModule.forRoot({
+      serveRoot: '/uploads',
+      rootPath: join(__dirname, '..', './uploads'),
+    }),
   ],
 })
 export class AppModule {}

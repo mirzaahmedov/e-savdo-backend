@@ -35,6 +35,7 @@ export class UsersController {
     const { user, accessToken } = await this.usersService.login(loginUserDto);
 
     res.cookie('access_token', accessToken, {
+      path: '/',
       httpOnly: true,
       sameSite: 'strict',
       secure: true,
