@@ -1,26 +1,93 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { CreateShoppingCartItemDto } from './dto/create-shopping-cart-item.dto';
+import { PrismaService } from '@app/prisma/prisma.service';
 import { UpdateShoppingCartItemDto } from './dto/update-shopping-cart-item.dto';
 
 @Injectable()
 export class ShoppingCartItemsService {
-  create(createShoppingCartItemDto: CreateShoppingCartItemDto) {
-    return 'This action adds a new shoppingCartItem';
+  constructor(private readonly prisma: PrismaService) {}
+
+  create(userID: number, createShoppingCartItemDto: CreateShoppingCartItemDto) {
+    return this.prisma.shoppingCartItem.create({
+      data: {
+        quantity: createShoppingCartItemDto.quantity,
+        productVariation: {
+          connect: {
+            id: createShoppingCartItemDto.productVariationID,
+          },
+        },
+        user: {
+          connect: {
+            id: userID,
+          },
+        },
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all shoppingCartItems`;
+  findAll(userID: number) {
+    return this.prisma.shoppingCartItem.findMany({
+      where: {
+        userID,
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} shoppingCartItem`;
+  async findOne(userID: number, id: number) {
+    const shoppingCartItem = await this.prisma.shoppingCartItem.findUnique({
+      where: {
+        id,
+        userID,
+      },
+    });
+    if (!shoppingCartItem) {
+      throw new NotFoundException('ShoppingCartItem not found');
+    }
+
+    return shoppingCartItem;
   }
 
-  update(id: number, updateShoppingCartItemDto: UpdateShoppingCartItemDto) {
-    return `This action updates a #${id} shoppingCartItem`;
+  async update(
+    userID: number,
+    id: number,
+    updateShoppingCartItemDto: UpdateShoppingCartItemDto,
+  ) {
+    const shoppingCartItem = await this.prisma.shoppingCartItem.findUnique({
+      where: {
+        id,
+        userID,
+      },
+    });
+    if (!shoppingCartItem) {
+      throw new NotFoundException('ShoppingCartItem not found');
+    }
+
+    return this.prisma.shoppingCartItem.update({
+      where: {
+        id,
+        userID,
+      },
+      data: updateShoppingCartItemDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} shoppingCartItem`;
+  async remove(userID: number, id: number) {
+    const shoppingCartItem = await this.prisma.shoppingCartItem.findUnique({
+      where: {
+        id,
+        userID,
+      },
+    });
+    if (!shoppingCartItem) {
+      throw new NotFoundException('ShoppingCartItem not found');
+    }
+
+    return this.prisma.shoppingCartItem.delete({
+      where: {
+        id,
+        userID,
+      },
+    });
   }
 }

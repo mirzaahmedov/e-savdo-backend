@@ -22,7 +22,7 @@ model User {
   id Int @id @default(autoincrement())
   firstName String
   lastName String?
-  phone Int @unique
+  phone String @unique
   password String
   role UserRole @default(USER)
   shoppingCartItems ShoppingCartItem[]
@@ -69,10 +69,11 @@ model Product {
   descriptionUZ String
   descriptionOZ String
   descriptionRU String
-  rating Int
+  rating Int @default(0)
   category Category @relation(fields: [categoryID], references: [id])
   categoryID Int
   variations ProductVariation[]
+  images ProductImage[]
   updatedDate DateTime? @updatedAt
   createdDate DateTime @default(now())
 
@@ -98,6 +99,8 @@ model ProductVariation {
 model ProductImage {
   id Int @id @default(autoincrement())
   url String
+  product Product @relation(fields: [productID], references: [id])
+  productID Int
   variation ProductVariation @relation(fields: [variationID], references: [id])
   variationID Int
   updatedDate DateTime? @updatedAt
@@ -114,7 +117,7 @@ enum ProductAttributeType {
 }
 model ProductAttribute {
   id Int @id @default(autoincrement())
-  variation ProductVariation @relation(fields: [variationID], references: [id])
+  variation ProductVariation @relation(fields: [variationID], references: [id], onDelete: Cascade)
   variationID Int
   type ProductAttributeType
   nameUZ String

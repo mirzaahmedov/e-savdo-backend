@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
 import { CreateProductImageDto } from './dto/create-product-image.dto';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@app/prisma/prisma.service';
 import { UpdateProductImageDto } from './dto/update-product-image.dto';
 
 @Injectable()
 export class ProductImagesService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createProductImageDto: CreateProductImageDto) {
-    return 'This action adds a new productImage';
+    return this.prisma.productImage.create({
+      data: createProductImageDto,
+    });
   }
 
   findAll() {
@@ -17,6 +22,7 @@ export class ProductImagesService {
   }
 
   update(id: number, updateProductImageDto: UpdateProductImageDto) {
+    console.log(updateProductImageDto);
     return `This action updates a #${id} productImage`;
   }
 

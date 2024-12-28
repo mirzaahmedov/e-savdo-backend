@@ -1,14 +1,18 @@
 import { CategoriesModule } from './categories/categories.module';
 import { JwtModule } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
+import { MulterModule } from '@nestjs/platform-express';
 import { PrismaModule } from './prisma/prisma.module';
-import { UsersModule } from './users/users.module';
-import { ProductsModule } from './products/products.module';
-import { ProductVariationsModule } from './product-variations/product-variations.module';
 import { ProductAttributesModule } from './product-attributes/product-attributes.module';
 import { ProductImagesModule } from './product-images/product-images.module';
+import { ProductVariationsModule } from './product-variations/product-variations.module';
+import { ProductsModule } from './products/products.module';
 import { ShoppingCartItemsModule } from './shopping-cart-items/shopping-cart-items.module';
-import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+
+MulterModule.register({
+  dest: './uploads',
+});
 
 @Module({
   imports: [
@@ -21,7 +25,6 @@ import { AuthModule } from './auth/auth.module';
     ProductAttributesModule,
     ProductImagesModule,
     ShoppingCartItemsModule,
-    AuthModule,
   ],
 })
 export class AppModule {}

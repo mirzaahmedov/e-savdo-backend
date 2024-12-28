@@ -6,18 +6,49 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductImagesService } from './product-images.service';
-import { CreateProductImageDto } from './dto/create-product-image.dto';
 import { UpdateProductImageDto } from './dto/update-product-image.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { AuthenticatedGuard } from '@app/users/authenticated.guard';
 
-@Controller('product-images')
+@Controller('products/:productID/variations/:variationID/images')
+@UseGuards(AuthenticatedGuard)
 export class ProductImagesController {
   constructor(private readonly productImagesService: ProductImagesService) {}
 
   @Post()
-  create(@Body() createProductImageDto: CreateProductImageDto) {
-    return this.productImagesService.create(createProductImageDto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (_, file, cb) => {
+          // Generating a 32 random chars long string
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          //Calling the callback passing the random name generated with the original extension name
+          cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  create(
+    @Param('productID') productID: string,
+    @Param('variationID') variationID: string,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
+    return this.productImagesService.create({
+      url: image.filename,
+      productID: +productID,
+      variationID: +variationID,
+    });
   }
 
   @Get()
